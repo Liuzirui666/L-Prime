@@ -1,0 +1,167 @@
+#ifndef RECOGNITION
+#define RECOGNITION
+#pragma warning(disable:4996)
+#include<iostream>
+#include<iomanip>
+#include<cstdio>
+#include<cstdlib>
+#include<string>
+#include<cstring>
+#include<cmath>
+#include<ctime>
+#include<algorithm>
+#include<stack>
+#include<queue>
+#include<vector>
+#include<set>
+#include<map>
+#define INF 0x3f3f3f3f
+#define re register int
+#define mem(a,b) memset(a,b,sizeof(a))
+#define _mem(a,b) memset(a,0,(b+1)<<2)
+#define lowbit(a) ((a)&-(a))
+//using namespace std;
+typedef unsigned long long LL;
+
+enum SectionType { Node = 0, Binary, Tree, Graph };
+
+
+class LineSolver
+{
+private:
+	std::vector<std::pair<int, int> > line;
+
+public:
+	LineSolver() = default;
+
+	const std::vector<std::pair<int, int> >& Solver(const std::string str);
+
+	~LineSolver() = default;
+
+
+};
+
+class GraphDistinguisher
+{
+private:
+
+	struct SectionGraph
+	{
+		SectionType type;
+		int weight;
+		int size;
+
+		SectionGraph(SectionType type1, int weight1, int size1)
+		{
+			type = type1;
+			weight = weight1;
+			size = size1;
+		}
+
+		void print(std::ostream& out)
+		{
+			out << "--";
+			switch (type)
+			{
+			case Node:out << "Node. ";break;
+			case Binary:out << "Binary tree. ";break;
+			case Tree: out << "Tree. "; break;
+			case Graph: out << "Graph. ";break;
+			default: throw"not in case ERROR";
+			}
+			out << "Weight: " << weight << ". Size: " << size << ".";
+		}
+
+		friend bool operator <(const SectionGraph& a, const SectionGraph& b)
+		{
+			if (a.type < b.type)
+				return true;
+			else if (a.type == b.type && a.weight < b.weight)
+				return true;
+			else if (a.type == b.type && a.weight == b.weight && a.size < b.size)
+				return true;
+			else
+				return false;
+
+		}
+
+		~SectionGraph() = default;
+
+	};
+
+
+	std::vector<std::pair<int, int> > edges;
+	std::vector<SectionGraph> store;
+	std::vector<int>* G, * reG;
+
+	int max_point;
+	bool* exist_point;
+	bool* visited;
+	bool* backup_visited;
+	bool* used;
+
+	std::pair<std::pair<int, int>, bool> binary_or_tree(int x);
+
+	std::pair<int, int> is_Graph(int x);
+
+	bool DoubleCheck(int x, int front);
+
+	void work();
+
+
+public:  //*****************************************************
+
+	GraphDistinguisher(const std::vector < std::pair <int, int> > e) : edges(e)
+	{
+		store.clear();
+		max_point = -1;
+		for (int i = 0; i < edges.size(); ++i) {
+			max_point = std::max(std::max(max_point, edges[i].first), edges[i].second);
+		}
+		int max_size = max_point + 10;
+		exist_point = new bool[max_size];
+		visited = new bool[max_size];
+		used = new bool[max_size];
+		G = new std::vector<int>[max_size];
+		reG = new std::vector<int>[max_size];
+		for (int i = 0; i <= max_point; ++i)
+		{
+			exist_point[i] = visited[i] = used[i] = 0;
+			G[i].clear(), reG[i].clear();
+		}
+
+		for (int i = 0; i < edges.size(); ++i) {
+			exist_point[edges[i].first] = 1;
+			if (edges[i].second != -1)
+				exist_point[edges[i].second] = 1;
+		}
+		work();
+	}
+
+	void ccout(std::ostream& os) {
+		os << "We have recognized " << store.size() << " graph";
+		if (store.size() >= 2) os << "s";
+		os << ".";
+		for (int i = 0; i < store.size(); ++i) {
+			os << "\n";
+			store[i].print(os);
+		}
+	}
+
+	~GraphDistinguisher() {
+		if (G != nullptr) delete[] G;
+		if (reG != nullptr) delete[] reG;
+		if (exist_point != nullptr) delete[]exist_point;
+		if (visited != nullptr) delete[]visited;
+		if (used != nullptr) delete[]used;
+
+	}
+
+};
+
+
+
+
+
+
+#endif
